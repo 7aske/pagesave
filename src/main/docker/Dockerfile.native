@@ -1,0 +1,29 @@
+####
+# This Dockerfile is used in order to build a container that runs the Quarkus application in native (no JVM) mode.
+#
+# Before building the container image run:
+#
+# ./mvnw package -Pnative -Dquarkus.native.container-build=true
+#
+# Then, build the image with:
+#
+# docker build -f src/main/docker/Dockerfile.native -t quarkus/pagesave .
+#
+# Then run the container using:
+#
+# docker run -i --rm -p 8080:8080 quarkus/pagesave
+#
+###
+FROM openstax/selenium-chrome:latest
+USER root
+RUN mkdir -p /work/
+WORKDIR /work/
+RUN chown 1000 /work \
+    && chmod "g+rwX" /work \
+    && chown 1000:root /work
+COPY --chown=1000:root target/*-runner /work/application
+
+EXPOSE 8080
+USER 1000
+
+CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
